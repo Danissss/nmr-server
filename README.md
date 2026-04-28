@@ -35,7 +35,7 @@ See `Gemfile` for Ruby gems. Key dependencies:
 ### 1. Clone Repository
 
 ```bash
-cd /Users/xuan/Desktop/nmr_server
+cd /Users/xuan/Desktop/nmr-server
 ```
 
 ### 2. Install Ruby Gems
@@ -113,7 +113,7 @@ Visit: `http://localhost:3000/query/new`
 ## File Structure
 
 ```
-nmr_server/
+nmr-server/
 ├── app/
 │   ├── controllers/query_controller.rb    # Main prediction logic
 │   ├── models/input_model.rb              # Data model for inputs
