@@ -1,0 +1,164 @@
+<script src="/marvin4js/gui/lib/promise-1.0.0.min.js"></script>
+<script src="/marvin4js/js/marvinjslauncher.js"></script>
+
+<style>
+  .result-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px;
+  }
+  
+  .molecule-section {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .spectrum-section {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .section-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .molecule-info {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 4px;
+  }
+</style>
+
+<div class="result-container">
+  <h1>NMR Prediction Results</h1>
+  
+  <!-- Molecule Structure Section -->
+  <div class="molecule-section">
+    <div class="section-title">Molecule Structure</div>
+    <div>
+      <iframe src="/marvin4js/editor.html" id="molecule-viewer" width="618px" height="474px" style="border:1px solid #b3b3b3;"></iframe>
+    </div>
+    <div class="molecule-info">
+      <p><strong>Sample Compound:</strong> Adenosine (HMDB00001)</p>
+      <p><strong>Chemical Formula:</strong> C₁₀H₁₃N₅O₄</p>
+      <p><strong>Chemical Shifts (ppm):</strong> 3.07, 3.16, 3.68, 3.96, 7.0, 7.67</p>
+    </div>
+  </div>
+
+  <!-- NMR Spectrum Section -->
+  <div class="spectrum-section">
+    <div class="section-title">¹H NMR Spectrum</div>
+    <div id="sample_graph" width="400" height="400"></div>
+  </div>
+</div>
+
+<script>
+  // Initialize MarvinJS viewer with sample molecule
+  var marvinViewerInstance;
+  
+  MarvinJSUtil.getEditor("#molecule-viewer").then(function(sketcherInstance) {
+    marvinViewerInstance = sketcherInstance;
+    
+    // Load sample molecule (Adenosine) from SDF file
+    // You can replace this with any molecule structure in MOL/SDF format
+    var sampleMolecule = `
+  Mrv2311 02282401522D          
+
+  0  0  0     0  0            999 V3000
+M  V30 BEGIN CTAB
+M  V30 COUNTS 19 21 0 0 0
+M  V30 BEGIN ATOM
+M  V30 1 N -4.2917 3.2083 0 0
+M  V30 2 C -5.6253 3.9783 0 0
+M  V30 3 N -5.6253 5.5183 0 0
+M  V30 4 C -4.2917 6.2883 0 0
+M  V30 5 C -2.958 5.5183 0 0
+M  V30 6 C -2.958 3.9783 0 0
+M  V30 7 N -1.6244 3.2083 0 0
+M  V30 8 C -1.6244 1.6683 0 0
+M  V30 9 N -2.958 0.8983 0 0
+M  V30 10 C -4.2917 1.6683 0 0
+M  V30 11 N -1.6244 5.5183 0 0
+M  V30 12 C -0.2908 3.9783 0 0
+M  V30 13 O 1.043 3.2083 0 0
+M  V30 14 C 2.3766 3.9783 0 0
+M  V30 15 C 2.3766 5.5183 0 0
+M  V30 16 O 1.043 6.2883 0 0
+M  V30 17 C -0.2908 5.5183 0 0
+M  V30 18 O 3.7102 6.2883 0 0
+M  V30 19 O 3.7102 3.2083 0 0
+M  V30 END ATOM
+M  V30 BEGIN BOND
+M  V30 1 2 1 2
+M  V30 2 1 2 3
+M  V30 3 2 3 4
+M  V30 4 1 4 5
+M  V30 5 1 5 6
+M  V30 6 2 1 6
+M  V30 7 1 6 7
+M  V30 8 1 7 8
+M  V30 9 2 8 9
+M  V30 10 1 9 10
+M  V30 11 2 1 10
+M  V30 12 2 5 11
+M  V30 13 1 11 17
+M  V30 14 1 7 12
+M  V30 15 1 12 13
+M  V30 16 1 13 14
+M  V30 17 1 14 15
+M  V30 18 1 15 16
+M  V30 19 1 16 17
+M  V30 20 1 12 17
+M  V30 21 1 15 18
+M  V30 22 1 14 19
+M  V30 END BOND
+M  V30 END CTAB
+M  END
+`;
+    
+    // Import the structure into MarvinJS
+    marvinViewerInstance.importStructure('mol', sampleMolecule);
+    
+  }, function(error) {
+    console.error("Loading of the molecule viewer failed: " + error);
+  });
+
+  // Draw NMR Spectrum Graph
+  var data = {
+    x: <%= @x_axis || '[]' %>,
+    y: <%= @y_axis || '[]' %>
+  };
+
+  if (data.x.length > 0 && data.y.length > 0) {
+    let wave = Graph.newWaveform().setData(data.y, data.x);
+    let data2 = JSON.parse(JSON.stringify(data));
+    let wave2 = Graph.newWaveform().setData(data2.y, data2.x);
+
+    var graph = new Graph('sample_graph', {
+      plugins: {
+        peakPicking: {}
+      }
+    });
+
+    graph.resize(1000, 400);
+    const eiSerie = graph
+      .newSerie('ei', { lineToZero: true })
+      .autoAxis()
+      .setWaveform(wave);
+
+    graph.getPlugin('peakPicking').setSerie(eiSerie);
+    graph.draw();
+  } else {
+    document.getElementById('sample_graph').innerHTML = 
+      '<p style="padding: 20px; text-align: center; color: #666;">⚠️ NMR spectrum data not available. Make sure MATLAB Engine for Python 3 is installed.</p>';
+  }
+</script>

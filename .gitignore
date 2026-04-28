@@ -1,0 +1,90 @@
+# Java/MATLAB specific
+*.model
+*.jar
+
+# Rails
+*.rbc
+capybara-*.html
+.rspec
+/db/*.sqlite3
+/db/*.sqlite3-*
+/db/*.sqlite3-journal
+/db/*.sqlite3-[0-9]*
+/public/system
+/coverage/
+/spec/tmp
+*.orig
+rerun.txt
+pickle-email-*.html
+
+# Ignore all logfiles and tempfiles
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore pidfiles, but keep the directory
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+
+# Ignore uploaded files in development
+/storage/*
+!/storage/.keep
+/public/uploads/*
+!/public/uploads/.keep
+/public/tmp_sdf/*.sdf
+!/public/tmp_sdf/.keep
+
+# Ignore master key for decrypting credentials and more
+/config/master.key
+/config/credentials/*.key
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Bundler
+/.bundle
+/vendor/bundle
+
+# Node modules
+/node_modules
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDEs
+/.idea
+/.vscode
+*.swp
+*.swo
+*~
+.project
+.settings
+.classpath
+
+# RubyMine
+/.rakeTasks
+
+# Test coverage
+/coverage
+
+# Ignore Spring files
+/spring/*.pid

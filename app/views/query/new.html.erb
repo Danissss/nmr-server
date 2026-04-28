@@ -1,0 +1,126 @@
+<script src="/marvin4js/gui/lib/promise-1.0.0.min.js"></script>
+<script src="/marvin4js/js/marvinjslauncher.js"></script>
+
+<style>
+  .prediction-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  
+  .input-method {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .input-method h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.3em;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 10px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .btn-predict {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .btn-predict:hover {
+    background-color: #45a049;
+  }
+  
+  .btn-sample {
+    background-color: #2196F3;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .btn-sample:hover {
+    background-color: #0b7dda;
+  }
+</style>
+
+<div class="prediction-container">
+  <h1>NMR Prediction</h1>
+
+  <!-- Method 1: Draw Structure -->
+  <div class="input-method">
+    <h2>📐 Method 1: Draw Molecule Structure</h2>
+    <%= form_tag("/query/result", method: 'post') do |form| %>
+      <div class="form-group">
+        <iframe src="/marvin4js/editor.html" id="sketch" width="618px" height="474px" style="border:1px solid #b3b3b3;"></iframe>
+      </div>
+      <%= text_area_tag(:sdf_content, :text, :style => "display:none;") %>
+      <%= submit_tag("Predict from Drawing", name: 'sketch', class: 'btn-predict', onclick: "get_sdf_content()") %>
+    <% end %>
+  </div>
+
+  <!-- Method 2: Input SMILES or Upload File -->
+  <div class="input-method">
+    <h2>💡 Method 2: SMILES String or File Upload</h2>
+    <%= form_for @inputmodel, url:"/query/result", method: :post  do |f| %>
+      <div class="form-group">
+        <%= f.label :smiles, "SMILES String" %>
+        <%= f.text_area :smiles, rows: 3, style: "width: 100%; max-width: 600px;" %>
+      </div>
+      <div class="form-group">
+        <%= f.label :file, "Or Upload SDF/MOL File" %>
+        <%= f.file_field :file %>
+      </div>
+      <%= f.submit "Predict from SMILES/File", class: 'btn-predict' %>
+    <% end %>
+  </div>
+
+  <!-- Method 3: Run Sample Test -->
+  <div class="input-method">
+    <h2>🧪 Method 3: Try Sample Molecule</h2>
+    <p style="color: #666; margin-bottom: 15px;">Test with a pre-loaded example (Adenosine - HMDB00001)</p>
+    <%= form_tag("/query/result", method: 'post') do |form| %>
+      <%= submit_tag("Run Sample Test", name: 'test_sample', class: 'btn-sample') %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  var marvinSketcherInstance;
+
+  MarvinJSUtil.getEditor("#sketch").then(function(sketcherInstance) {
+    marvinSketcherInstance = sketcherInstance;
+  }, function(error) {
+    alert("Loading of the sketcher failed: " + error);
+  });  
+
+  function get_sdf_content(){
+    exportPromise = marvinSketcherInstance.exportStructure('mol');
+    exportPromise.then(function(result){
+      console.log(result);
+      $('[name="sdf_content"]').val(result);
+    });
+  }
+</script>
+
